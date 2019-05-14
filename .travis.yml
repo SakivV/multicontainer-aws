@@ -1,0 +1,20 @@
+sudo: required
+services:
+  - docker
+
+before_install:
+  - docker build -t banagevikas/dockercourse -f ./client/Dockerfile.dev ./client
+
+script:
+  - docker run banagevikas/dockercourse npm test -- --coverage
+
+after_success:
+  - docker build -t banagevikas/multi-client ./client
+  - docker build -t banagevikas/multi-nginx ./nginx
+  - docker build -t banagevikas/multi-server ./server
+  - docker build -t banagevikas/multi-worker ./worker
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  - docker push banagevikas/multi-client
+  - docker push banagevikas/multi-nginx
+  - docker push banagevikas/multi-server
+  - docker push banagevikas/multi-worker
